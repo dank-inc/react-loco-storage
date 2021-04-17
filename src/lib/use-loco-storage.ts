@@ -20,11 +20,11 @@ export const useLocoStorage = <T extends Record<string, any>, K = keyof T>(
       if (!json) throw new Error();
       setData(JSON.parse(json));
     } catch (err) {
-      set(key, defaultValue);
+      set(defaultValue);
     }
   }, []);
 
-  const set = (key: K, body: Partial<T>): void => {
+  const set = (body: Partial<T>): void => {
     if (typeof key !== "string") return;
 
     try {
