@@ -1,28 +1,40 @@
-export const useLocoStorage = <
-  T extends Record<string, any>,
-  K extends keyof T
->() => {
-  const get = <T>(key: K): T[K] | null => {
+import { useCallback, useEffect, useState } from "react";
+
+export const useLocoStorage = <T extends Record<string, any>, K = keyof T>(
+  key: K,
+  defaultValue: any
+) => {
+  const [data, setData] = useState<Partial<T> | null>(null);
+
+  useEffect(() => {
+    if (typeof key !== "string") return;
+
+    get(key);
+  }, [key]);
+
+  const get = useCallback((key: K): void => {
+    if (typeof key !== "string") return;
+
     try {
       const json = localStorage.getItem(key);
-      if (!json) throw new Error(`key not found => ${key}`);
-      return JSON.parse(json);
+      if (!json) throw new Error();
+      setData(JSON.parse(json));
     } catch (err) {
-      console.error("Coudln't parse item for some reason idk.", err);
-      return null;
+      set(key, defaultValue);
     }
-  };
+  }, []);
 
-  const set = <T>(key: K, body: Partial<T>): boolean => {
+  const set = (key: K, body: Partial<T>): void => {
+    if (typeof key !== "string") return;
+
     try {
       const json = JSON.stringify(body);
       localStorage.setItem(key, json);
-      return true;
+      setData(body);
     } catch (err) {
       console.error("Couldn't store body - invalid json", body);
-      return false;
     }
   };
 
-  return { get, set };
+  return [data, get, set];
 };
